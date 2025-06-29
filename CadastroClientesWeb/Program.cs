@@ -1,9 +1,5 @@
 using CadastroClientesWeb.Context;
-using Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
-using System;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 var builder = WebApplication.CreateBuilder(args);
 
