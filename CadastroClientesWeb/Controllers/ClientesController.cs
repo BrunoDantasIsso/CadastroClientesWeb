@@ -131,7 +131,7 @@ namespace CadastroClientesWeb.Controllers
                     // Sincroniza telefones
                     // Remove telefones que não vieram do form
                     var idsForm = cliente.Telefones?.Where(t => t.Id != 0).Select(t => t.Id).ToList() ?? new List<int>();
-                    var telefonesRemover = clienteExistente.Telefones.Where(t => !idsForm.Contains(t.Id)).ToList();
+                    var telefonesRemover = clienteExistente.Telefones?.Where(t => !idsForm.Contains(t.Id)).ToList() ?? new List<Telefone>();
                     foreach (var tel in telefonesRemover)
                         _context.Telefones.Remove(tel);
 
@@ -145,7 +145,7 @@ namespace CadastroClientesWeb.Controllers
                         }
                         else
                         {
-                            var telDb = clienteExistente.Telefones.FirstOrDefault(t => t.Id == telForm.Id);
+                            var telDb = clienteExistente.Telefones?.FirstOrDefault(t => t.Id == telForm.Id);
                             if (telDb != null)
                                 telDb.Numero = telForm.Numero;
                         }
