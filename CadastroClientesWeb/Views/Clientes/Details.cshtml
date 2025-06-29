@@ -1,0 +1,74 @@
+﻿@model CadastroClientesWeb.Models.Cliente
+
+<h2>Detalhes do Cliente</h2>
+
+    <hr />
+<div>
+    <h3>@Model.Nome</h3>
+        <h4>Contatos</h4>
+    <dl class="row">
+        <div class="col-6">
+        <dt class="col-sm-6">Telefones</dt>
+    @if (Model.Telefones != null && Model.Telefones.Any())
+    {
+        <dd>
+        <ul >
+        @foreach (var tel in Model.Telefones)
+            {
+                <li>@tel.Numero</li>
+            }
+        </ul>
+        </dd>
+    }
+    else
+    {
+        <p>Sem telefones cadastrados.</p>
+    }
+        </div>
+        <div class="col-6">
+
+        <dt class="col-sm-6">Email</dt>
+        <dd class="col-sm-12">@Model.Email</dd>
+        </div>
+    </dl>
+
+    <h4>Endereço</h4>
+    @if (Model.Endereco != null)
+    {
+        <div>
+        <dl class="row">
+            <div class="col-4">
+                <dt>Logradouro</dt>
+                <dd>@Model.Endereco.Logradouro</dd>
+            </div>
+            <div class="col-4">
+                <dt>Número</dt>
+                <dd>@Model.Endereco.Numero</dd>
+            </div>
+            <div class="col-4">
+                <dt>Bairro</dt>
+                <dd>@Model.Endereco.Bairro</dd>
+            </div>
+            <div class="col-4">
+            <dt>Cidade</dt>
+            <dd>@Model.Endereco.Cidade</dd>
+            </div>
+            <div class="col-4">
+                <dt>Estado</dt>
+                <dd>@Model.Endereco.Estado</dd>
+            </div>
+            <div class="col-4">
+                <dt>CEP</dt>
+                <dd>@Model.Endereco.Cep</dd>
+            </div>
+             </dl>
+        </div>
+    }
+    else
+    {
+        <p>Sem endereço cadastrado.</p>
+    }
+
+    
+</div>
+<a asp-action="Index" class="btn btn-primary mt-3 mb-5">Voltar</a>

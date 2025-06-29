@@ -1,0 +1,125 @@
+﻿@model CadastroClientesWeb.Models.Cliente
+
+@{
+ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Cliente</h4>
+<hr />
+<div class="row">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label asp-for="Nome"></label>
+                    <input asp-for="Nome" class="form-control" />
+                    <span asp-validation-for="Nome" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="Email"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label asp-for="Endereco.Logradouro"></label>
+                    <input asp-for="Endereco.Logradouro" class="form-control" />
+                </div>
+                <div class="form-group col-md-3">
+                    <label asp-for="Endereco.Numero"></label>
+                    <input asp-for="Endereco.Numero" class="form-control" />
+                </div>
+                <div class="form-group col-md-3">
+                    <label asp-for="Endereco.Bairro"></label>
+                    <input asp-for="Endereco.Bairro" class="form-control" />
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="form-group col-md-5">
+                    <label asp-for="Endereco.Cidade"></label>
+                    <input asp-for="Endereco.Cidade" class="form-control" />
+                </div>
+                <div class="form-group col-md-4">
+                    <label asp-for="Endereco.Estado"></label>
+                    <input asp-for="Endereco.Estado" class="form-control" />
+                </div>
+                <div class="form-group col-md-3">
+                    <label asp-for="Endereco.Cep"></label>
+                    <input asp-for="Endereco.Cep" class="form-control" />
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label>Telefone</label>
+                    <div id="telefones-list">
+                        @for (int i = 0; i < Model.Telefones?.Count(); i++)
+                        {
+                            <div class="row align-items-center telefone-item mb-2">
+                                <div class="col-8">
+                                    <input type="hidden" name="Telefones[@i].Id" value="@Model.Telefones.ElementAt(i).Id" />
+                                    <input name="Telefones[@i].Numero" value="@Model.Telefones.ElementAt(i).Numero" class="form-control" placeholder="Telefone" />
+                                </div>
+                                <div class="col-4">
+                                    <button type="button" class="btn btn-danger btn-sm remove-telefone" onclick="removeTelefone(this)">Remover</button>
+                                </div>
+                            </div>
+                         }
+                    </div>
+                    <button type="button" class="btn btn-secondary mb-2" onclick="addTelefone()">Adicionar Telefone</button>
+                </div>
+            </div>
+            <div class="form-group mb-5">
+                <a asp-action="Index" class="btn btn-primary">Voltar</a>
+                <input type="submit" value="Salvar" class="btn btn-success" />
+            </div>
+        </form>
+    
+</div>
+<div class="mb-5"></div>
+
+@section Scripts {
+<script>
+    let telefoneIndex = @Model.Telefones?.Count() ?? 0;
+    function addTelefone() {
+        const list = document.getElementById('telefones-list');
+        const div = document.createElement('div');
+        div.className = 'row align-items-center telefone-item mb-2';
+        div.innerHTML = `<div class="col-8">
+                                <input type="hidden" name="Telefones[${telefoneIndex}].Id" value="0" />
+                                <input name="Telefones[${telefoneIndex}].Numero" class="form-control" placeholder="Telefone" />
+                             </div>
+                             <div class="col-4">
+                                <button type="button" class="btn btn-danger btn-sm remove-telefone ml-2 mt-2" onclick="removeTelefone(this)">Remover</button>
+                             </div>`;
+        list.appendChild(div);
+        telefoneIndex++;
+    }
+    function removeTelefone(btn) {
+        btn.closest('.telefone-item').remove();
+        setTimeout(reindexTelefones, 0); // Garante reindexação após remoção do DOM
+    }
+    function reindexTelefones() {
+        const items = document.querySelectorAll('#telefones-list .telefone-item');
+        let idx = 0;
+        items.forEach(item => {
+            const inputId = item.querySelector('input[type="hidden"]');
+            const inputNumero = item.querySelector('input[type="text"], input:not([type="hidden"])');
+            if (inputId) inputId.name = `Telefones[${idx}].Id`;
+            if (inputNumero) inputNumero.name = `Telefones[${idx}].Numero`;
+            idx++;
+        });
+        telefoneIndex = idx;
+    }
+</script>
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
