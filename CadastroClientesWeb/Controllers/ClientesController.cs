@@ -92,62 +92,58 @@ namespace CadastroClientesWeb.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+
+
+                var clienteExistente = await _context.Clientes
+                    .Include(c => c.Endereco)
+                    .Include(c => c.Telefones)
+                    .FirstOrDefaultAsync(c => c.Id == id);
+
+                if (clienteExistente == null)
+                    return NotFound();
+
+                // Atualiza dados básicos
+                clienteExistente.Nome = cliente.Nome;
+                clienteExistente.Email = cliente.Email;
+
+                // Atualiza endereço
+                if (clienteExistente.Endereco != null && cliente.Endereco != null)
                 {
-                    var clienteExistente = await _context.Clientes
-                        .Include(c => c.Endereco)
-                        .Include(c => c.Telefones)
-                        .FirstOrDefaultAsync(c => c.Id == id);
-
-                    if (clienteExistente == null)
-                        return NotFound();
-
-                    // Atualiza dados básicos
-                    clienteExistente.Nome = cliente.Nome;
-                    clienteExistente.Email = cliente.Email;
-
-                    // Atualiza endereço
-                    if (clienteExistente.Endereco != null && cliente.Endereco != null)
-                    {
-                        clienteExistente.Endereco.Logradouro = cliente.Endereco.Logradouro;
-                        clienteExistente.Endereco.Numero = cliente.Endereco.Numero;
-                        clienteExistente.Endereco.Bairro = cliente.Endereco.Bairro;
-                        clienteExistente.Endereco.Cidade = cliente.Endereco.Cidade;
-                        clienteExistente.Endereco.Estado = cliente.Endereco.Estado;
-                        clienteExistente.Endereco.Cep = cliente.Endereco.Cep;
-                    }
-
-                    // Sincroniza telefones
-                    // Remove telefones que não vieram do form
-                    var idsForm = cliente.Telefones?.Where(t => t.Id != 0).Select(t => t.Id).ToList() ?? new List<int>();
-                    var telefonesRemover = clienteExistente.Telefones?.Where(t => !idsForm.Contains(t.Id)).ToList() ?? new List<Telefone>();
-                    foreach (var tel in telefonesRemover)
-                        _context.Telefones.Remove(tel);
-
-                    // Atualiza ou adiciona telefones
-                    foreach (var telForm in cliente.Telefones ?? new List<Telefone>())
-                    {
-                        if (telForm.Id == 0)
-                        {
-                            telForm.ClienteId = clienteExistente.Id;
-                            _context.Telefones.Add(telForm);
-                        }
-                        else
-                        {
-                            var telDb = clienteExistente.Telefones?.FirstOrDefault(t => t.Id == telForm.Id);
-                            if (telDb != null)
-                                telDb.Numero = telForm.Numero;
-                        }
-                    }
-
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    clienteExistente.Endereco.Logradouro = cliente.Endereco.Logradouro;
+                    clienteExistente.Endereco.Numero = cliente.Endereco.Numero;
+                    clienteExistente.Endereco.Bairro = cliente.Endereco.Bairro;
+                    clienteExistente.Endereco.Cidade = cliente.Endereco.Cidade;
+                    clienteExistente.Endereco.Estado = cliente.Endereco.Estado;
+                    clienteExistente.Endereco.Cep = cliente.Endereco.Cep;
                 }
-                catch (DbUpdateConcurrencyException)
+
+                // Sincroniza telefones
+                // Remove telefones que não vieram do form
+                var idsForm = cliente.Telefones?.Where(t => t.Id != 0).Select(t => t.Id).ToList() ?? new List<int>();
+                var telefonesRemover = clienteExistente.Telefones?.Where(t => !idsForm.Contains(t.Id)).ToList() ?? new List<Telefone>();
+                foreach (var tel in telefonesRemover)
+                    _context.Telefones.Remove(tel);
+
+                // Atualiza ou adiciona telefones
+                foreach (var telForm in cliente.Telefones ?? new List<Telefone>())
                 {
-                    ModelState.AddModelError("", "O registro foi alterado por outro usuário. Recarregue e tente novamente.");
-                    return View(cliente);
+                    if (telForm.Id == 0)
+                    {
+                        telForm.ClienteId = clienteExistente.Id;
+                        _context.Telefones.Add(telForm);
+                    }
+                    else
+                    {
+                        var telDb = clienteExistente.Telefones?.FirstOrDefault(t => t.Id == telForm.Id);
+                        if (telDb != null)
+                            telDb.Numero = telForm.Numero;
+                    }
                 }
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+
+
             }
 
             foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
